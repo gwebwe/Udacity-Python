@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post">
+	New Text( What is your birthday?)
+	<br>
+	<label> Month
+	<input type="text" name="month" value="{{month}}">
+	</label>
+	<label> Day
+	<input type="text" name="day" value="{{day}}">
+	</label>
+	<label> Year
+		<input type="text"  name="year" value="{{year}}">
+	</label>
+	<div style="color:red"> {{error}}</div>
+	<br>
+	<input type="submit">
+</form>
+<form action="/rot13" method="get">
+    <input type="submit" value="ROT13">
+</form>
+<form action="/usersignup" method="get">
+    <input type="submit" value="User Signup">
+</form>
+</body>
+</html>
