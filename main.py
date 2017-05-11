@@ -18,6 +18,7 @@ from htmlform import *
 import re
 import jinja2
 import os
+from google.appengine.ext import db
 
 template_dir=os.path.join(os.path.dirname(__file__),'templates')
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True)
@@ -106,7 +107,7 @@ class MainPage(Handler):
             self.redirect("/thanks")
         else:
             self.render('form.html',year=user_year,month=user_month,day=user_day,error='Not a Valid Date')
-class Thanks(webapp2.RequestHandler):
+class Thanks(Handler):
     def get(self):
         self.response.write("Thanks for a valid date")
 class rot13(Handler):
@@ -118,7 +119,7 @@ class rot13(Handler):
         textval=self.request.get("text")
         self.write_rot13form(rot13function(textval))
 
-class usersignup(webapp2.RequestHandler):
+class usersignup(Handler):
     def write_signupform(self,user="",usererror="",pwerror="",matchingerror="",email=""):
         self.response.write(usersignupform % {'user':user,'usererror':usererror,
                                           'pwerror':pwerror,
@@ -151,9 +152,31 @@ class usersignup(webapp2.RequestHandler):
                 pass
             self.write_signupform(input_user,usererror,pwerror,matchingerror,input_email)
 
-class welcome(webapp2.RequestHandler):
+class welcome(Handler):
     def get(self):
         user=self.request.get("username")
         self.response.write("Welcome "+user)
+
+class Pic(db.Model):
+    title=db.StringProperty(required=True)
+    pic=db.TextProperty(required=True)
+    date=db.DateTimeProperty(auto_now_add=True)
+
+class ascii(Handler):
+    def render_front(self,title="",pic="",error=""):
+        pics=db.GqlQuery("select * from Pic order by date DESC")
+        self.render('ascii.html',title=title,pic=pic,error=error,pics=pics)
+    def get(self):
+        self.render_front()
+    def post(self):
+        title=self.request.get("title")
+        pic=self.request.get("asciipic")
+        if title and pic:
+            a=Pic(title=title,pic=pic)
+            a.put()
+            self.render_front()
+        else:
+            self.render_front(title=title, pic=pic,error="Please include both values")
 app = webapp2.WSGIApplication([
-    ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/usersignup",usersignup),("/welcome",welcome)], debug=True)
+    ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/usersignup",usersignup),("/welcome",welcome),
+    ("/ascii",ascii)], debug=True)

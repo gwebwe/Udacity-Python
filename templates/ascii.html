@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style type="text/css">
+    textarea {
+        width:400px;
+        height:200px;
+        font-size:17px;
+    }
+    .error {
+        color: red
+    }
+
+    label {
+        display: block;
+        font-size: 20px;
+    }
+    .pic + .pic {
+        margin-top:20px
+    }
+    .title {
+        font-weight:bold;
+        font-size:25px;
+        text-decoration: underline;
+    }
+    .pic-body{
+        margin:0;
+        font-size:15px
+    }
+
+</style>
+<body>
+<form action="/ascii" method="post">
+        <label>
+            <div>Title</div>
+            <input type="text" name="title" value="{{title}}"/>
+        </label>
+        <label>
+            <div>AsciiPicture</div>
+            <textarea name="asciipic">{{pic}}</textarea>
+        </label>
+        <br>
+        <div class="error">{{error}}</div>
+        <input type="submit" name="submitascii"/>
+</form>
+{% for pic in pics %}
+    <div class='pic'>
+        <div class="title">
+            {{pic.title}}
+        </div>
+        <pre class="pic-body">{{pic.pic}}</pre>
+    </div>
+{% endfor %}
+</body>
+</html>
