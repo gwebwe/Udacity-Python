@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style type="text/css">
+    textarea {
+        width:400px;
+        height:200px;
+        font-size:17px;
+    }
+    .error {
+        color: red
+    }
+    label {
+        display: block;
+        font-size: 20px;
+    }
+    </style>
+    <title>Blog Entries</title>
+</head>
+<body>
+<h1>Blog</h1>
+<form action="/blog" method="post">
+    <label>
+        <div>Title of Blog</div>
+        <input type="text" name="title" value="{{title}}"/>
+    </label>
+    <label>
+        <div>Blog Entry</div>
+        <textarea name="entry">{{entry}}</textarea>
+    </label>
+    <br>
+    <div class="error">{{error}}</div>
+    <input type="submit" name="submitentry"/>
+</form>
+</body>
+</html>

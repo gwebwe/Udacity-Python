@@ -161,7 +161,9 @@ class Pic(db.Model):
     title=db.StringProperty(required=True)
     pic=db.TextProperty(required=True)
     date=db.DateTimeProperty(auto_now_add=True)
-
+class blogentry(db.Model):
+    title=db.StringProperty(required=True)
+    entry=db.TextProperty(required=True)
 class ascii(Handler):
     def render_front(self,title="",pic="",error=""):
         pics=db.GqlQuery("select * from Pic order by date DESC")
@@ -177,6 +179,13 @@ class ascii(Handler):
             self.render_front()
         else:
             self.render_front(title=title, pic=pic,error="Please include both values")
+class blog(Handler):
+    def render_front(self,title="",entry="",error=""):
+        entries=db.GqlQuery("select * from blogentry order by title DESC")
+        self.render('blog.html',title=title,entry=entry,error=error,entries=entries)
+    def get(self):
+        self.render_front()
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/usersignup",usersignup),("/welcome",welcome),
-    ("/ascii",ascii)], debug=True)
+    ("/ascii",ascii),("/blog",blog)],debug=True)
