@@ -185,7 +185,17 @@ class blog(Handler):
         self.render('blog.html',title=title,entry=entry,error=error,entries=entries)
     def get(self):
         self.render_front()
+class newblogpost(Handler):
+    def get(self):
+        self.render('newblogpost.html')
+    def post(self):
+        title=self.request.get("title")
+        entry=self.request.get("entry")
+        if title and entry:
+            b=blogentry(title=title,entry=entry)
+            b.put()
+            self.response.write("works")
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/usersignup",usersignup),("/welcome",welcome),
-    ("/ascii",ascii),("/blog",blog)],debug=True)
+    ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost)],debug=True)
