@@ -162,8 +162,10 @@ class Pic(db.Model):
     pic=db.TextProperty(required=True)
     date=db.DateTimeProperty(auto_now_add=True)
 class blogentry(db.Model):
-    title=db.StringProperty(required=True)
-    entry=db.TextProperty(required=True)
+    subject=db.StringProperty(required=True)
+    content=db.TextProperty(required=True)
+    dateid=db.DateTimeProperty(auto_now_add=True)
+
 class ascii(Handler):
     def render_front(self,title="",pic="",error=""):
         pics=db.GqlQuery("select * from Pic order by date DESC")
@@ -180,22 +182,33 @@ class ascii(Handler):
         else:
             self.render_front(title=title, pic=pic,error="Please include both values")
 class blog(Handler):
-    def render_front(self,title="",entry="",error=""):
-        entries=db.GqlQuery("select * from blogentry order by title DESC")
-        self.render('blog.html',title=title,entry=entry,error=error,entries=entries)
+    def render_front(self,subject="",content="",error=""):
+        entries=db.GqlQuery("select * from blogentry order by subject DESC")
+        self.render('blog.html',subject=subject,content=content,error=error,entries=entries)
     def get(self):
         self.render_front()
-class newblogpost(Handler):
+class blogselectedvalue(Handler):
     def get(self):
-        self.render('newblogpost.html')
+        url=self.request.url
+        id=url.rsplit('/',1)[1]
+        entry=db.GqlQuery("select * from blogentry where __key__ IN :1",id)
+        self.response.write(id)
+class newblogpost(Handler):
+    def render_front(self,subject="",content="",error=""):
+        self.render('newblogpost.html',subject=subject,content=content,error=error)
+    def get(self):
+        self.render_front()
     def post(self):
-        title=self.request.get("title")
-        entry=self.request.get("entry")
-        if title and entry:
-            b=blogentry(title=title,entry=entry)
+        subject=self.request.get("subject")
+        content=self.request.get("content")
+        if subject and content:
+            b=blogentry(subject=subject,content=content)
             b.put()
-            self.response.write("works")
+            self.redirect('/blog/'+str(b.key().id()))
+        else:
+            self.render_front(subject=subject,content=content,error="Please enter both values")
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/usersignup",usersignup),("/welcome",welcome),
-    ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost)],debug=True)
+    ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/[0-9]+",blogselectedvalue)],debug=True)
