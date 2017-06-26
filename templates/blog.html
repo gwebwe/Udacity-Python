@@ -23,5 +23,15 @@
 <form action="/blog/newpost" method="get">
     <input type="submit" name="submitentry" value="Submit New Post"/>
 </form>
+{% for entry in entries %}
+<div class="subject">
+    <h2>Subject</h2>
+    {{entry.subject}}
+</div>
+<div class="content">
+    <h2>Content</h2>
+    {{entry.content}}
+</div>
+{% endfor %}
 </body>
 </html>
