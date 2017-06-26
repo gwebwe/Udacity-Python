@@ -15,6 +15,10 @@
         display: block;
         font-size: 20px;
     }
+    a {
+            color:black;
+            text-decoration:none;
+    }
     </style>
     <title>Blog Entries</title>
 </head>
@@ -25,7 +29,7 @@
 </form>
 {% for entry in entries %}
 <div class="subject">
-    <h2>{{entry.subject}}</h2>
+    <h2><a href="http://gwebweproject.appspot.com/blog/{{entry.key().id()}}">{{entry.subject}}</a></h2>
 </div>
 <div class="content">
     <p>{{entry.content}}</p>
