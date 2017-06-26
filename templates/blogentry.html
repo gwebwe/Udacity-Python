@@ -12,12 +12,11 @@
 <body>
 {% for val in entry %}
 <div class="subject">
-    <h2>Subject</h2>
-    {{val.subject}}
+    <h2>{{val.subject}}</h2>
 </div>
 <div class="content">
-    <h2>Content</h2>
-    {{val.content}}
+    <p>{{val.content}}</p>
+
 </div>
 {% endfor %}
 </body>

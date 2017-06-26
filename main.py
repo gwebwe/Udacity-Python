@@ -188,10 +188,8 @@ class blog(Handler):
     def get(self):
         self.render_front()
 class blogselectedvalue(Handler):
-    def get(self):
-        url=self.request.url
-        id=int(url.rsplit('/',1)[1])
-        entry=db.GqlQuery("select * from blogentry where __key__=KEY('blogentry',:1)",id)
+    def get(self,id):
+        entry=db.GqlQuery("select * from blogentry where __key__=KEY('blogentry',:1)",int(id))
         self.render('blogentry.html',entry=entry)
 class newblogpost(Handler):
     def render_front(self,subject="",content="",error=""):
@@ -211,4 +209,4 @@ class newblogpost(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/usersignup",usersignup),("/welcome",welcome),
-    ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/[0-9]+",blogselectedvalue)],debug=True)
+    ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/([0-9]+)",blogselectedvalue)],debug=True)
