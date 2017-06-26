@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        h2{
+            text-decoration: underline;
+        }
+    </style>
+    <title>Blog Entry</title>
+</head>
+<body>
+{% for val in entry %}
+<div class="subject">
+    <h2>Subject</h2>
+    {{val.subject}}
+</div>
+<div class="content">
+    <h2>Content</h2>
+    {{val.content}}
+</div>
+{% endfor %}
+</body>
+</html>

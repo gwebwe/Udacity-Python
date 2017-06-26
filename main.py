@@ -190,9 +190,8 @@ class blog(Handler):
 class blogselectedvalue(Handler):
     def get(self):
         url=self.request.url
-        id=url.rsplit('/',1)[1]
-        entry=db.GqlQuery("select * from blogentry where __key__ IN :1",id)
-        self.response.write(id)
+        id=int(url.rsplit('/',1)[1])
+        self.render('blogentry.html',entry=entry)
 class newblogpost(Handler):
     def render_front(self,subject="",content="",error=""):
         self.render('newblogpost.html',subject=subject,content=content,error=error)
