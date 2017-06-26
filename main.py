@@ -191,6 +191,7 @@ class blogselectedvalue(Handler):
     def get(self):
         url=self.request.url
         id=int(url.rsplit('/',1)[1])
+        entry=db.GqlQuery("select * from blogentry where __key__=KEY('blogentry',:1)",id)
         self.render('blogentry.html',entry=entry)
 class newblogpost(Handler):
     def render_front(self,subject="",content="",error=""):
