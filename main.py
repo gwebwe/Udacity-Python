@@ -19,6 +19,8 @@ import re
 import jinja2
 import os
 from google.appengine.ext import db
+import hashlib
+import hmac
 
 template_dir=os.path.join(os.path.dirname(__file__),'templates')
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True)
@@ -131,7 +133,8 @@ class usersignup(Handler):
         usererror = ""
         pwerror = ""
         matchingerror = ""
-        input_user=self.request.get("username")
+        cookie_user=str(self.request.cookies.get('name'))
+        input_user=str(self.request.get("username"))
         input_password=self.request.get("password")
         input_verify=self.request.get("verify")
         input_email=self.request.get("email")
@@ -139,8 +142,9 @@ class usersignup(Handler):
         password=valid_password(input_password)
         matching=match_password(input_password,input_verify)
         email=valid_email(input_email)
-        if username and password and matching and email:
-            self.redirect("/welcome?username="+input_user)
+        if username and password and matching and email and(input_user!=cookie_user):
+            self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
+            self.redirect("/welcome")
         else:
             if not username:
                 usererror="That's not a valid username."
@@ -150,12 +154,14 @@ class usersignup(Handler):
                 matchingerror="Your passwords didn't match."
             if not email:
                 pass
+            if input_user==cookie_user:
+                usererror="User already exist"
             self.write_signupform(input_user,usererror,pwerror,matchingerror,input_email)
 
 class welcome(Handler):
     def get(self):
-        user=self.request.get("username")
-        self.response.write("Welcome "+user)
+        user=self.request.cookies.get('name')
+        self.response.write("Welcome "+ user)
 
 class Pic(db.Model):
     title=db.StringProperty(required=True)
