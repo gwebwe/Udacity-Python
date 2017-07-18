@@ -208,5 +208,5 @@ class newblogpost(Handler):
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/usersignup",usersignup),("/welcome",welcome),
+    ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/signup",usersignup),("/welcome",welcome),
     ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/([0-9]+)",blogselectedvalue)],debug=True)
