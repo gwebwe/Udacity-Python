@@ -142,8 +142,10 @@ class usersignup(Handler):
         password=valid_password(input_password)
         matching=match_password(input_password,input_verify)
         email=valid_email(input_email)
+        hashpassword=hashlib.md5(input_password).hexdigest()
         if username and password and matching and email and(input_user!=cookie_user):
             self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
+            self.response.headers.add_header('Set-Cookie', 'password=%s; Path=/' % hashpassword)
             self.redirect("/welcome")
         else:
             if not username:
@@ -166,7 +168,9 @@ class login(Handler):
     def post(self):
         input_user = str(self.request.get("username"))
         cookie_user = str(self.request.cookies.get('name'))
-        if input_user == cookie_user:
+        input_password = self.request.get("password")
+        cookie_password=str(self.request.cookies.get('password'))
+        if (input_user == cookie_user) and hashlib.md5(input_password).hexdigest()==cookie_password:
             self.redirect("/welcome")
         else:
             self.render_login("Invalid Login")
