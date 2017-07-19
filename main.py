@@ -123,10 +123,10 @@ class rot13(Handler):
 
 class usersignup(Handler):
     def write_signupform(self,user="",usererror="",pwerror="",matchingerror="",email=""):
-        self.response.write(usersignupform % {'user':user,'usererror':usererror,
-                                          'pwerror':pwerror,
-                                          'matchingerror':matchingerror,
-                                          'email':email})
+        self.render('signup.html',user=user,usererror=usererror,
+                                              pwerror=pwerror,
+                                              matchingerror=matchingerror,
+                                              email=email)
     def get(self):
         self.write_signupform()
     def post(self):
@@ -157,6 +157,19 @@ class usersignup(Handler):
             if input_user==cookie_user:
                 usererror="User already exist"
             self.write_signupform(input_user,usererror,pwerror,matchingerror,input_email)
+
+class login(Handler):
+    def render_login(self,loginerror=''):
+        self.render('login.html',loginerror=loginerror)
+    def get(self):
+        self.render_login()
+    def post(self):
+        input_user = str(self.request.get("username"))
+        cookie_user = str(self.request.cookies.get('name'))
+        if input_user == cookie_user:
+            self.redirect("/welcome")
+        else:
+            self.render_login("Invalid Login")
 
 class welcome(Handler):
     def get(self):
@@ -214,5 +227,5 @@ class newblogpost(Handler):
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/signup",usersignup),("/welcome",welcome),
+    ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/signup",usersignup),("/welcome",welcome),("/login",login),
     ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/([0-9]+)",blogselectedvalue)],debug=True)
