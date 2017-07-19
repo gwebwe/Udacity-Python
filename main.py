@@ -175,6 +175,15 @@ class login(Handler):
         else:
             self.render_login("Invalid Login")
 
+class logoff(Handler):
+    def get(self):
+        input_user=''
+        hashpassword=''
+        self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
+        self.response.headers.add_header('Set-Cookie', 'password=%s; Path=/' % hashpassword)
+        self.redirect("/signup")
+
+
 class welcome(Handler):
     def get(self):
         user=self.request.cookies.get('name')
@@ -232,4 +241,5 @@ class newblogpost(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/signup",usersignup),("/welcome",welcome),("/login",login),
-    ("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/([0-9]+)",blogselectedvalue)],debug=True)
+    ("/logout", logoff),("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/([0-9]+)",blogselectedvalue)],
+    debug=True)
