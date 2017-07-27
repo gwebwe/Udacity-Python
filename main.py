@@ -198,6 +198,11 @@ class blogentry(db.Model):
     content=db.TextProperty(required=True)
     dateid=db.DateTimeProperty(auto_now_add=True)
 
+class useraccounts(db.Model):
+    user=db.StringProperty(required=True)
+    password=db.StringProperty(required=True)
+    date = db.DateTimeProperty(auto_now_add=True)
+
 class ascii(Handler):
     def render_front(self,title="",pic="",error=""):
         pics=db.GqlQuery("select * from Pic order by date DESC")
