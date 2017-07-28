@@ -143,8 +143,8 @@ class usersignup(Handler):
         matching=match_password(input_password,input_verify)
         email=valid_email(input_email)
         hashpassword=hashlib.md5(input_password).hexdigest()
-        checkuser=len(db.GqlQuery("select user from useraccounts where user=:1",input_user))
-        if username and password and matching and email and (input_user!=cookie_user) and not checkuser:
+        checkuser=db.GqlQuery("select user from useraccounts where user=:1",input_user)
+        if username and password and matching and email and (input_user!=cookie_user) and checkuser!=input_user:
             useracc=useraccounts(user=input_user,password=hashpassword)
             useracc.put()
             self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
