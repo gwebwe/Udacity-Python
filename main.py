@@ -80,6 +80,9 @@ def valid_email(email):
     return email_re.match(email) or not email
 def match_password(password1,password2):
     return password1==password2
+def check_user(input_user):
+    checkuser = db.GqlQuery("select user from useraccounts where user=:1", input_user)
+    return checkuser==input_user
 
 class Handler(webapp2.RequestHandler):
     def write(self,*a,**kw):
@@ -143,14 +146,14 @@ class usersignup(Handler):
         matching=match_password(input_password,input_verify)
         email=valid_email(input_email)
         hashpassword=hashlib.md5(input_password).hexdigest()
-        checkuser=db.GqlQuery("select user from useraccounts where user=:1",input_user)
-        if username and password and matching and email and (input_user!=cookie_user) and checkuser!=input_user:
+        checkuser=check_user(input_user)
+        if username and password and matching and email and (input_user!=cookie_user) and not checkuser:
             useracc=useraccounts(user=input_user,password=hashpassword)
             useracc.put()
             self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
             self.redirect("/welcome")
         else:
-            if checkuser==1 or input_user==cookie_user:
+            if checkuser or input_user==cookie_user:
                 usererror="User already exist, try a new user"
             if not username:
                 usererror="That's not a valid username."
@@ -170,8 +173,8 @@ class login(Handler):
     def post(self):
         input_user = str(self.request.get("username"))
         input_password = hashlib.md5(self.request.get("password")).hexdigest()
-        checkinfo=db.GqlQuery("select * from useraccounts where user=:1",input_user)
-        if checkinfo[0].user==input_user and checkinfo[0].password==input_password:
+        checkinfo = db.GqlQuery("select * from useraccounts where user=:1", input_user)
+        if  checkinfo[0].user==input_user and checkinfo[0].password==input_password:
             self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
             self.redirect("/welcome")
         else:
