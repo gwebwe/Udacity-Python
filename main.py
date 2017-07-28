@@ -143,8 +143,8 @@ class usersignup(Handler):
         matching=match_password(input_password,input_verify)
         email=valid_email(input_email)
         hashpassword=hashlib.md5(input_password).hexdigest()
-        checkuser=db.GqlQuery("select user from useraccounts where user=:1",input_user)
-        if username and password and matching and email and (input_user!=cookie_user) and checkuser!=input_user:
+        checkuser=len(db.GqlQuery("select user from useraccounts where user=:1",input_user))
+        if username and password and matching and email and (input_user!=cookie_user) and not checkuser:
             useracc=useraccounts(user=input_user,password=hashpassword)
             useracc.put()
             self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
@@ -169,10 +169,10 @@ class login(Handler):
         self.render_login()
     def post(self):
         input_user = str(self.request.get("username"))
-        cookie_user = str(self.request.cookies.get('name'))
-        input_password = self.request.get("password")
-        cookie_password=str(self.request.cookies.get('password'))
-        if (input_user == cookie_user) and hashlib.md5(input_password).hexdigest()==cookie_password:
+        input_password = hashlib.md5(self.request.get("password")).hexdigest()
+        checkinfo=db.GqlQuery("select * from useraccounts where user=:1",input_user)
+        if checkinfo[0].user==input_user and checkinfo[0].password==input_password:
+            self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
             self.redirect("/welcome")
         else:
             self.render_login("Invalid Login")
