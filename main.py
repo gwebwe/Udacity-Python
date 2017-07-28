@@ -143,11 +143,15 @@ class usersignup(Handler):
         matching=match_password(input_password,input_verify)
         email=valid_email(input_email)
         hashpassword=hashlib.md5(input_password).hexdigest()
-        if username and password and matching and email and(input_user!=cookie_user):
+        checkuser=db.GqlQuery("select user from useraccounts where user=:1",input_user)
+        if username and password and matching and email and (input_user!=cookie_user) and checkuser!=input_user:
+            useracc=useraccounts(user=input_user,password=hashpassword)
+            useracc.put()
             self.response.headers.add_header('Set-Cookie', 'name=%s; Path=/' % input_user)
-            self.response.headers.add_header('Set-Cookie', 'password=%s; Path=/' % hashpassword)
             self.redirect("/welcome")
         else:
+            if checkuser==1 or input_user==cookie_user:
+                usererror="User already exist, try a new user"
             if not username:
                 usererror="That's not a valid username."
             if not password:
@@ -156,8 +160,6 @@ class usersignup(Handler):
                 matchingerror="Your passwords didn't match."
             if not email:
                 pass
-            if input_user==cookie_user:
-                usererror="User already exist"
             self.write_signupform(input_user,usererror,pwerror,matchingerror,input_email)
 
 class login(Handler):
