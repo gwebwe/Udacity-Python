@@ -94,13 +94,10 @@ class Handler(webapp2.RequestHandler):
         self.write(self.render_str(template,**kw))
 
 class MainPage(Handler):
-    # def write_form(self,error="",month="",day="",year=""):
-    #     self.response.write(form % {'error': error,
-    #                                 'month':escape_html(month),
-    #                                 escape_html('day'):day,
-    #                                 'year':escape_html(year)})
+    def write_form(self,error="",month="",day="",year=""):
+        self.render('form.html',error=error,month=month,day=day,year=year,)
     def get(self):
-        self.render('form.html')
+        self.write_form()
     def post(self):
         user_month=self.request.get("month")
         user_day=self.request.get("day")
@@ -111,13 +108,13 @@ class MainPage(Handler):
         if bmonth and bday and byear:
             self.redirect("/thanks")
         else:
-            self.render('form.html',year=user_year,month=user_month,day=user_day,error='Not a Valid Date')
+            self.write_form(error='Not a Valid Date',month=user_month,day=user_day,year=user_year)
 class Thanks(Handler):
     def get(self):
         self.response.write("Thanks for a valid date")
 class rot13(Handler):
-    def write_rot13form(self,text=""):
-        self.response.write(rot13page %{'text':escape_html(text)})
+    def write_rot13form(self,textval=""):
+        self.render('rot13.html',textval=textval)
     def get(self):
         self.write_rot13form()
     def post(self):
