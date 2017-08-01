@@ -21,6 +21,8 @@ import os
 from google.appengine.ext import db
 import hashlib
 import hmac
+import urllib2
+from xml.dom import minidom
 
 template_dir=os.path.join(os.path.dirname(__file__),'templates')
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True)
@@ -41,6 +43,7 @@ months = ['January',
 username_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 password_re=re.compile(r"^.{3,20}$")
 email_re=re.compile(r"^[\S]+@[\S]+.[\S]+$")
+IP_URL="http://freegeoip.net/xml/"
 def rot13function(text):
     textbox=[]
     for char in text:
@@ -84,6 +87,23 @@ def check_user(input_user):
     checkuser = db.GqlQuery("select user from useraccounts where user=:1", input_user)
     return checkuser==input_user
 
+
+def get_coords(ip):
+    url=IP_URL+ip
+    content= None
+    try:
+        content=urllib2.urlopen(url).read()
+    except URLError:
+        return "error"
+    if content:
+        parseval=minidom.parseString(content)
+        if parseval:
+            lat=parseval.getElementsByTagName("Latitude")[0].childNodes[0].nodeValue
+            lon = parseval.getElementsByTagName("Longitude")[0].childNodes[0].nodeValue
+            return db.GeoPt(lat,lon)
+
+
+
 class Handler(webapp2.RequestHandler):
     def write(self,*a,**kw):
         self.response.out.write(*a,**kw)
@@ -124,9 +144,9 @@ class rot13(Handler):
 class usersignup(Handler):
     def write_signupform(self,user="",usererror="",pwerror="",matchingerror="",email=""):
         self.render('signup.html',user=user,usererror=usererror,
-                                              pwerror=pwerror,
-                                              matchingerror=matchingerror,
-                                              email=email)
+                    pwerror=pwerror,
+                    matchingerror=matchingerror,
+                    email=email)
     def get(self):
         self.write_signupform()
     def post(self):
@@ -195,6 +215,7 @@ class Pic(db.Model):
     title=db.StringProperty(required=True)
     pic=db.TextProperty(required=True)
     date=db.DateTimeProperty(auto_now_add=True)
+    coords=db.GeoPtProperty()
 class blogentry(db.Model):
     subject=db.StringProperty(required=True)
     content=db.TextProperty(required=True)
@@ -214,8 +235,11 @@ class ascii(Handler):
     def post(self):
         title=self.request.get("title")
         pic=self.request.get("asciipic")
+        coord=get_coords(self.request.remote_addr)
         if title and pic:
             a=Pic(title=title,pic=pic)
+            if coord:
+                a.coords=coord
             a.put()
             self.render_front()
         else:
