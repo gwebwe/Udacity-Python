@@ -23,6 +23,7 @@ import hashlib
 import hmac
 import urllib2
 from xml.dom import minidom
+import json
 
 template_dir=os.path.join(os.path.dirname(__file__),'templates')
 jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape=True)
@@ -119,6 +120,10 @@ class Handler(webapp2.RequestHandler):
         return t.render(params)
     def render(self,template,**kw):
         self.write(self.render_str(template,**kw))
+    def render_json(self, d):
+        json_txt = json.dumps(d)
+        self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+        self.write(json_txt)
 
 class MainPage(Handler):
     def write_form(self,error="",month="",day="",year=""):
@@ -227,6 +232,12 @@ class blogentry(db.Model):
     subject=db.StringProperty(required=True)
     content=db.TextProperty(required=True)
     dateid=db.DateTimeProperty(auto_now_add=True)
+    def as_dict(self):
+        time_fmt = '%c'
+        d = {'subject': self.subject,
+             'content': self.content,
+             'created': self.dateid.strftime(time_fmt)}
+        return d
 
 class useraccounts(db.Model):
     user=db.StringProperty(required=True)
@@ -257,15 +268,23 @@ class ascii(Handler):
         else:
             self.render_front(title=title, pic=pic,error="Please include both values")
 class blog(Handler):
-    def render_front(self,subject="",content="",error=""):
+    def get(self,subject="",content="",error=""):
         entries=db.GqlQuery("select * from blogentry order by subject DESC")
-        self.render('blog.html',subject=subject,content=content,error=error,entries=entries)
-    def get(self):
-        self.render_front()
+        if self.request.url.endswith('.json'):
+            return self.render_json([entry.as_dict() for entry in entries])
+        else:
+            self.render('blog.html', subject=subject, content=content, error=error, entries=entries)
 class blogselectedvalue(Handler):
     def get(self,id):
         entry=db.GqlQuery("select * from blogentry where __key__=KEY('blogentry',:1)",int(id))
-        self.render('blogentry.html',entry=entry)
+
+        if not entry:
+            self.error(404)
+            return
+        if self.request.url.endswith('.json'):
+            return self.render_json([val.as_dict() for val in entry])
+        else:
+            self.render('blogentry.html', entry=entry)
 class newblogpost(Handler):
     def render_front(self,subject="",content="",error=""):
         self.render('newblogpost.html',subject=subject,content=content,error=error)
@@ -284,5 +303,4 @@ class newblogpost(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),("/thanks",Thanks),("/rot13",rot13),("/signup",usersignup),("/welcome",welcome),("/login",login),
-    ("/logout", logoff),("/ascii",ascii),("/blog",blog),("/blog/newpost",newblogpost),("/blog/([0-9]+)",blogselectedvalue)],
-    debug=True)
+    ("/logout", logoff),("/ascii",ascii),("/blog(?:.json)?",blog),("/blog/newpost",newblogpost),("/blog/([0-9]+)(?:.json)?",blogselectedvalue)], debug=True)
