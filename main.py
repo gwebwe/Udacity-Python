@@ -44,6 +44,7 @@ username_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 password_re=re.compile(r"^.{3,20}$")
 email_re=re.compile(r"^[\S]+@[\S]+.[\S]+$")
 IP_URL="http://freegeoip.net/xml/"
+GMAPS_URL = "http://maps.googleapis.com/maps/api/staticmap?size=380x263&sensor=false&"
 def rot13function(text):
     textbox=[]
     for char in text:
@@ -88,6 +89,8 @@ def check_user(input_user):
     return checkuser==input_user
 
 
+
+
 def get_coords(ip):
     url=IP_URL+ip
     content= None
@@ -103,6 +106,10 @@ def get_coords(ip):
             return db.GeoPt(lat,lon)
 
 
+def gmaps_img(points):
+    ###Your code here
+    query="&".join("markers=%s,%s" % (p.lat,p.lon) for p in points)
+    return GMAPS_URL + query
 
 class Handler(webapp2.RequestHandler):
     def write(self,*a,**kw):
@@ -229,7 +236,12 @@ class useraccounts(db.Model):
 class ascii(Handler):
     def render_front(self,title="",pic="",error=""):
         pics=db.GqlQuery("select * from Pic order by date DESC")
-        self.render('ascii.html',title=title,pic=pic,error=error,pics=pics)
+        pics=list(pics)
+        hascoords=[coordval.coords for coordval in pics if coordval.coords!=None]
+        img=None
+        if hascoords:
+            img=gmaps_img(hascoords)
+        self.render('ascii.html',title=title,pic=pic,error=error,pics=pics,img=img)
     def get(self):
         self.render_front()
     def post(self):

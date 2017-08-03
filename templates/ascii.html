@@ -34,25 +34,28 @@
 </style>
 <body>
 <form action="/ascii" method="post">
-        <label>
-            <div>Title</div>
-            <input type="text" name="title" value="{{title}}"/>
-        </label>
-        <label>
-            <div>AsciiPicture</div>
-            <textarea name="asciipic">{{pic}}</textarea>
-        </label>
-        <br>
-        <div class="error">{{error}}</div>
-        <input type="submit" name="submitascii"/>
+    <label>
+        <div>Title</div>
+        <input type="text" name="title" value="{{title}}"/>
+    </label>
+    <label>
+        <div>AsciiPicture</div>
+        <textarea name="asciipic">{{pic}}</textarea>
+    </label>
+    <br>
+    <div class="error">{{error}}</div>
+    <input type="submit" name="submitascii"/>
 </form>
+{% if img %}
+<img src="{{img}}">
+{% endif %}
 {% for pic in pics %}
-    <div class='pic'>
-        <div class="title">
-            {{pic.title}}
-        </div>
-        <pre class="pic-body">{{pic.pic}}</pre>
+<div class='pic'>
+    <div class="title">
+        {{pic.title}}
     </div>
+    <pre class="pic-body">{{pic.pic}}</pre>
+</div>
 {% endfor %}
 </body>
 </html>
