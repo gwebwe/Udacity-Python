@@ -244,10 +244,19 @@ class useraccounts(db.Model):
     password=db.StringProperty(required=True)
     date = db.DateTimeProperty(auto_now_add=True)
 
+cache={}
+def front_art():
+    key='front'
+    if key in cache:
+        pics=cache[key]
+    else:
+        pics = db.GqlQuery("select * from Pic order by date DESC")
+        pics = list(pics)
+        cache[key]=pics
+    return pics
 class ascii(Handler):
     def render_front(self,title="",pic="",error=""):
-        pics=db.GqlQuery("select * from Pic order by date DESC")
-        pics=list(pics)
+        pics=front_art()
         hascoords=[coordval.coords for coordval in pics if coordval.coords!=None]
         img=None
         if hascoords:
